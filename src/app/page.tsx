@@ -7,14 +7,36 @@ import { useState } from "react";
 
 export default function Home() {
   const options = [5, 10, 15, 25, 50];
-  const [value, setValue] = useState('');
+  const [billValue, setBillValue] = useState(0.0);
+  const [peopleCount, setPeopleCount] = useState(0);
 
-  const handleChange = (e: { target: { value: any; }; }) => {
+  const [tip, setTip] = useState(0.0);
+  const [cost, setCost] = useState(0.0);
+
+  const handleBillChange = (e: { target: { value: any; }; }) => {
     const inputValue = e.target.value;
     // Allow only numbers and decimal point
     if (/^\d*\.?\d*$/.test(inputValue)) {
-      setValue(inputValue);
+      setBillValue(inputValue);
     }
+  }
+
+  const handlePeopleChange = (e: { target: { value: any; }; }) => {
+    const inputValue = e.target.value;
+    // Allow only numbers
+    if (/^\d*$/.test(inputValue)) {
+      setPeopleCount(Number(inputValue));
+    }
+  }
+
+  const computeTip = () => {
+    if(!peopleCount) return 0.0;
+    return (billValue * tip) / peopleCount;
+  }
+
+  const computeTotal = () => {
+    if(!peopleCount) return 0.0;
+    return (billValue / peopleCount) + computeTip();
   }
 
   return (
@@ -28,8 +50,8 @@ export default function Home() {
               id="billInput" 
               type="email" 
               placeholder="0" 
-              value={value}
-              onChange={handleChange}
+              value={billValue === 0 ? '' : billValue}
+              onChange={handleBillChange}
               />
           </div>
         </div>
@@ -40,14 +62,27 @@ export default function Home() {
 
         <div className="grid h-25 grid-cols-3">
           {options.map(v => {
-            return <Button key={v} variant="default" size="default">{v}%</Button>
+            return <Button 
+              key={v} 
+              variant="default" 
+              size="default"
+              onClick={() => setTip(v / 100)}
+              >{
+                v}%
+              </Button>
           })}
           <Button variant="secondary" size="default">Custom</Button>
         </div>
         
         <div>
           <Label>Number of People</Label>
-          <Input type="email" placeholder="0" />
+          <Input 
+            id="peopleInput" 
+            type="email" 
+            placeholder="0"
+            value={peopleCount === 0 ? '' : peopleCount}
+            onChange={handlePeopleChange}
+            />
         </div>
       </div>
 
@@ -68,11 +103,11 @@ export default function Home() {
 
           <div>
             <div>
-              <h1>$0.00</h1>
+              <h1>${computeTip().toFixed(2)}</h1>
             </div>
 
             <div>
-              <h1>$0.00</h1>
+              <h1>${computeTotal().toFixed(2)}</h1>
             </div>
           </div>
         </div>
